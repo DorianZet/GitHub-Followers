@@ -15,6 +15,7 @@ class FollowerListVC: UIViewController {
 
     var username: String!
     var followers: [Follower] = []
+    var filteredFollowers: [Follower] = []
     var page = 1
     var hasMoreFollowers = true
     
@@ -24,6 +25,7 @@ class FollowerListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
+        configureSearchController()
         configureCollectionView()
         getFollowers(username: username, page: page)
         configureDataSource()
@@ -48,9 +50,22 @@ class FollowerListVC: UIViewController {
         collectionView.register(FollowerCell.self, forCellWithReuseIdentifier: FollowerCell.reuseID)
     }
     
+    func configureSearchController() {
+        let searchController = UISearchController()
+        searchController.searchResultsUpdater = self // search controller has to have a delegate, which of course will be our VC.
+        searchController.searchBar.delegate = self // setting our VC to 'listen' to any changes in our searchBar
+        searchController.searchBar.placeholder = "Search for a username"
+        searchController.obscuresBackgroundDuringPresentation = false // now the collection view is not greyed-out when we activate the search bar.
+        navigationItem.searchController = searchController // setting search controller in the navigation controller.
+    }
+    
     func getFollowers(username: String, page: Int) {
+        showLoadingView() // this function is taken from the extension of UIViewController in 'UIViewController+Ext' file.
+        
         NetworkManager.shared.getFollowers(for: username, page: page) { [weak self] result in // our network manager has a strong reference to the FollowerListVC - this can cause a memory leak. So the solution is to make self WEAK.
             guard let self = self else { return } // unwrapping the 'self' so we don't have to make it optional below.
+            
+            self.dismissLoadingView() // once the loading finishes, dismiss the loading view (the one with spinning activity indicator).
             
             switch result {
             case .success(let followers): // with 'let followers' we describe what we get if the case is a success.
@@ -58,7 +73,16 @@ class FollowerListVC: UIViewController {
                     self.hasMoreFollowers = false // when we get the followers, set 'hasMoreFollowers' to false if there are less than 100 of them.
                 }
                 self.followers.append(contentsOf: followers) // add downloaded followers to the array of the followers.
-                self.updateData() //
+                
+                if self.followers.isEmpty {
+                    let message = "This user doesn't have any followers. Go follow them 😄."
+                    DispatchQueue.main.async {
+                        self.showEmptyStateView(with: message, in: self.view)
+                        return
+                    }
+                }
+                
+                self.updateData(on: self.followers)
 
             case .failure(let error): // with 'let error' we describe what we get if the case is a failure.
                 self.presentGFAlertOnMainThread(title: "Bad stuff happened", message: error.rawValue, buttonTitle: "OK") // 'rawValue' is an associated type of an enum. in this case it's a String, so in order to have errorMessage comply to the 'message' type in GFAlert, we have to make it a rawValue of the errorMessage - which is a String.
@@ -76,7 +100,7 @@ class FollowerListVC: UIViewController {
         // dataSource takes a snapshot of the current data, takes the snapshot of the new data and then it converges them (with a nice animation)
     }
     
-    func updateData() {
+    func updateData(on followers: [Follower]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Follower>() //
         snapshot.appendSections([.main]) // adding the sections that we want to snapshot
         snapshot.appendItems(followers)
@@ -89,7 +113,6 @@ class FollowerListVC: UIViewController {
 }
 
 extension FollowerListVC: UICollectionViewDelegate {
-    
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         let offsetY = scrollView.contentOffset.y // the y offset that gets incremented the more we scroll down.
         let contentHeight = scrollView.contentSize.height // height of our content view (for example, if we had 3000 followers, the content view height would be thousands of points!)
@@ -101,5 +124,17 @@ extension FollowerListVC: UICollectionViewDelegate {
             getFollowers(username: username, page: page)
         }
     }
+}
+
+
+extension FollowerListVC: UISearchResultsUpdating, UISearchBarDelegate { // anytime we change the search results, it's letting us know that something has changed.
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let filter = searchController.searchBar.text, !filter.isEmpty else { return } // our filter is the text in the search bar. once we have that filter, we want to check if it's not empty.
+        filteredFollowers = followers.filter { $0.login.lowercased().contains(filter.lowercased()) } // we are going through our 'followers' array and we are filtering out based on our 'filter' text. because we iterate through all the followers, '$0' is each follower. as we're going through the followers, we want to check their login, make it lowercased so casing is irrelevant when matching, and see if it contains our 'filter' text (also lowercased, for matching purposes).
+        updateData(on: filteredFollowers)
+    }
     
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        updateData(on: followers) // when the "Cancel" button is tapped, we want our original followers to appear.
+    }
 }
