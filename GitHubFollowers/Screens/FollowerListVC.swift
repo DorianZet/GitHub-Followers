@@ -18,6 +18,7 @@ class FollowerListVC: UIViewController {
     var filteredFollowers: [Follower] = []
     var page = 1
     var hasMoreFollowers = true
+    var isSearching = false // a boolean which checks if we are in a search mode or just browse all the followers.
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Follower>! // Diffable Data Source has to know about the section where it should work (Section) and about our collection view items (Follower)
@@ -124,17 +125,29 @@ extension FollowerListVC: UICollectionViewDelegate {
             getFollowers(username: username, page: page)
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let activeArray = isSearching ? filteredFollowers : followers // if 'isSearching' is true, activeArray = filteredFollowers. if its false, activeArray = followers. it's easier to remember just as W?T:F.
+        let follower = activeArray[indexPath.item]
+        
+        let destVC = UserInfoVC()
+        destVC.username = follower.login // passing the tapped follower's login to the 'username' property in destVC.
+        let navController = UINavigationController(rootViewController: destVC) // create the navigation controller for our destVC.
+        present(navController, animated: true) // instead of just presenting destVC, show the navigation controller that our destVC is embedded in.
+    }
 }
 
 
 extension FollowerListVC: UISearchResultsUpdating, UISearchBarDelegate { // anytime we change the search results, it's letting us know that something has changed.
     func updateSearchResults(for searchController: UISearchController) {
         guard let filter = searchController.searchBar.text, !filter.isEmpty else { return } // our filter is the text in the search bar. once we have that filter, we want to check if it's not empty.
+        isSearching = true
         filteredFollowers = followers.filter { $0.login.lowercased().contains(filter.lowercased()) } // we are going through our 'followers' array and we are filtering out based on our 'filter' text. because we iterate through all the followers, '$0' is each follower. as we're going through the followers, we want to check their login, make it lowercased so casing is irrelevant when matching, and see if it contains our 'filter' text (also lowercased, for matching purposes).
         updateData(on: filteredFollowers)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        isSearching = false
         updateData(on: followers) // when the "Cancel" button is tapped, we want our original followers to appear.
     }
 }

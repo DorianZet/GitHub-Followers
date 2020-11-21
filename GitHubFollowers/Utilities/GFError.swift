@@ -1,8 +1,8 @@
 //
-//  ErrorMessage.swift
+//  GFError.swift
 //  GitHubFollowers
 //
-//  Created by Mateusz Zacharski on 09/11/2020.
+//  Created by Mateusz Zacharski on 21/11/2020.
 //
 
 import Foundation

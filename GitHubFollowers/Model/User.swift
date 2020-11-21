@@ -6,17 +6,17 @@
 //
 
 import Foundation
-
+// As our app deals only with DISPLAYING the users info, not CHANGING anything in them, we don't have to make the user properties 'var' - except for the optionals, as those might or might not be there.
 struct User: Codable {
-    var login: String
-    var avatarUrl: String
+    let login: String
+    let avatarUrl: String
     var name: String? // as users don't have to put their names in, we have to make it as an optional
     var location: String? // same here.
     var bio: String? // same here.
-    var publicRepos: Int
-    var publicGists: Int
-    var htmlUrl: String
-    var following: Int
-    var followers: Int
-    var createdAt: String
+    let publicRepos: Int
+    let publicGists: Int
+    let htmlUrl: String
+    let following: Int
+    let followers: Int
+    let createdAt: String
 }

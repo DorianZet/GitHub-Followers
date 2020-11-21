@@ -14,7 +14,6 @@ class GFBodyLabel: UILabel {
         configure()
     }
     
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -24,7 +23,6 @@ class GFBodyLabel: UILabel {
         self.textAlignment = textAlignment
         configure()
     }
-    
     
     private func configure() {
         textColor = .secondaryLabel // good choice for a body or just a subtitle label.
