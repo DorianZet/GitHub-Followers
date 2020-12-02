@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol FollowerListVCDelegate: class {
+    func didRequestFollowers(for username: String)
+}
+
 class FollowerListVC: UIViewController {
     
     enum Section {
@@ -41,6 +45,8 @@ class FollowerListVC: UIViewController {
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.prefersLargeTitles = true
         
+        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
+        navigationItem.rightBarButtonItem = addButton
     }
     
     func configureCollectionView() {
@@ -110,6 +116,31 @@ class FollowerListVC: UIViewController {
         }
     }
     
+    @objc func addButtonTapped() {
+        showLoadingView()
+        NetworkManager.shared.getUserInfo(for: username) { [weak self] (result) in
+            guard let self = self else { return }
+            self.dismissLoadingView()
+            
+            switch result {
+            case .success(let user):
+                let favorite = Follower(login: user.login, avatarUrl: user.avatarUrl)
+                PersistenceManager.updateWith(favorite: favorite, actionType: .add) { [weak self] (error) in
+                    guard let self = self else { return }
+                    guard let error = error else {
+                        self.presentGFAlertOnMainThread(title: "Success!", message: "You have successfully favorited this user 😃!", buttonTitle: "Woohoo!")
+                        return
+                    }
+                    
+                    self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "OK") // if saving is unsuccessful, present the alert controller with the error.
+                }
+            case .failure(let error):
+                self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "OK")
+
+            }
+        }
+    }
+    
 
 }
 
@@ -132,6 +163,7 @@ extension FollowerListVC: UICollectionViewDelegate {
         
         let destVC = UserInfoVC()
         destVC.username = follower.login // passing the tapped follower's login to the 'username' property in destVC.
+        destVC.delegate = self // FollowerListVC is now "listening" to the UserInfoVC
         let navController = UINavigationController(rootViewController: destVC) // create the navigation controller for our destVC.
         present(navController, animated: true) // instead of just presenting destVC, show the navigation controller that our destVC is embedded in.
     }
@@ -151,3 +183,18 @@ extension FollowerListVC: UISearchResultsUpdating, UISearchBarDelegate { // anyt
         updateData(on: followers) // when the "Cancel" button is tapped, we want our original followers to appear.
     }
 }
+
+extension FollowerListVC: FollowerListVCDelegate {
+    func didRequestFollowers(for username: String) {
+        self.username = username // update our VC with new username from didRequestFollowers() method.
+        title = username
+        page = 1
+        followers.removeAll() // reset the followers array
+        filteredFollowers.removeAll()
+        collectionView.setContentOffset(.zero, animated: true) // scroll up to the content view.
+        getFollowers(username: username, page: page)
+    }
+}
+
+// Basically, delegates work here like that:
+// GFItemInfoVC will say "Hey, my button was tapped". -> "UserInfoVC" will say "OK, I will let the FollowerListVC know about that and dismiss myself" -> FollowerListVC will say "OK, I'm making a network call for new username" or "OK, I will show a new Safari VC with the user's profile".

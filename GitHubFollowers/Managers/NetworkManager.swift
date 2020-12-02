@@ -80,7 +80,7 @@ class NetworkManager {
             do {
                let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
-                let user = try decoder.decode(User.self, from: data) // we want a single user, so we try to decode it. We want to create that user of type 'User' from 'data', which is above in 'guard let data = data' line above.
+                let user = try decoder.decode(User.self, from: data) // we want a single user, so we try to decode it. We want to create that user of type 'User' from 'data', which is in 'guard let data = data' line above.
                 completed(.success(user)) // if all goes well, we get a user - we described that in the function parameters 'Result<User' - which goes for the success case.
             } catch { // catching the error.
                 completed(.failure(.invalidData))

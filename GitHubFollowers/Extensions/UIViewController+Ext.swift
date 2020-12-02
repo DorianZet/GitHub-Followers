@@ -4,7 +4,7 @@
 //
 //  Created by Mateusz Zacharski on 07/11/2020.
 //
-
+import SafariServices
 import UIKit
 
 fileprivate var containerView: UIView! // 'fileprivate' means anything in the extension below can use this variable. as it's not defined anywhere - it floats in a "no man's land", it can be used anywhere, so it's global.
@@ -18,6 +18,12 @@ extension UIViewController {
             alertVC.modalTransitionStyle = .crossDissolve
             self.present(alertVC, animated: true)
         }
+    }
+    
+    func presentSafariVC(with url: URL) {
+        let safariVC = SFSafariViewController(url: url)
+        safariVC.preferredControlTintColor = .systemGreen
+        present(safariVC, animated: true)
     }
     
     func showLoadingView() {
