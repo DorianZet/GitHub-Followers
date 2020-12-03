@@ -37,6 +37,7 @@
 		613D51752551A609008771DE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613D51742551A609008771DE /* SceneDelegate.swift */; };
 		613D517C2551A609008771DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 613D517B2551A609008771DE /* Assets.xcassets */; };
 		613D517F2551A609008771DE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 613D517D2551A609008771DE /* LaunchScreen.storyboard */; };
+		616891992578D592000FD7C9 /* FavoriteCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616891982578D592000FD7C9 /* FavoriteCell.swift */; };
 		61AFB493256E49B30067E2DA /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61AFB492256E49B30067E2DA /* Constants.swift */; };
 		61AFB496256E566C0067E2DA /* GFItemInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61AFB495256E566C0067E2DA /* GFItemInfoView.swift */; };
 /* End PBXBuildFile section */
@@ -74,6 +75,7 @@
 		613D517B2551A609008771DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		613D517E2551A609008771DE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		613D51802551A609008771DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		616891982578D592000FD7C9 /* FavoriteCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteCell.swift; sourceTree = "<group>"; };
 		61AFB492256E49B30067E2DA /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		61AFB495256E566C0067E2DA /* GFItemInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GFItemInfoView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -230,6 +232,7 @@
 			isa = PBXGroup;
 			children = (
 				613062DE2562A97200C68BB1 /* FollowerCell.swift */,
+				616891982578D592000FD7C9 /* FavoriteCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -348,6 +351,7 @@
 				613446AF2556D6030073AF83 /* GFAlertVC.swift in Sources */,
 				612DA4A0257654820018E867 /* GFFollowerItemVC.swift in Sources */,
 				61AFB496256E566C0067E2DA /* GFItemInfoView.swift in Sources */,
+				616891992578D592000FD7C9 /* FavoriteCell.swift in Sources */,
 				613062DF2562A97200C68BB1 /* FollowerCell.swift in Sources */,
 				613446AC2556D5190073AF83 /* GFBodyLabel.swift in Sources */,
 				610B960F256BE355007C6642 /* GFUserInfoHeaderVC.swift in Sources */,
