@@ -11,7 +11,7 @@ protocol FollowerListVCDelegate: class {
     func didRequestFollowers(for username: String)
 }
 
-class FollowerListVC: UIViewController {
+class FollowerListVC: GFDataLoadingVC {
     
     enum Section {
         case main // main section of our collection view. we create it in enum, because it's hashable (needs to be hashable for the diffableDataSource)
@@ -23,9 +23,20 @@ class FollowerListVC: UIViewController {
     var page = 1
     var hasMoreFollowers = true
     var isSearching = false // a boolean which checks if we are in a search mode or just browse all the followers.
+    var isLoadingMoreFollowers = false
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Follower>! // Diffable Data Source has to know about the section where it should work (Section) and about our collection view items (Follower)
+    
+    init(username: String) { // now when we push the FollowerListVC, we can initialize it with the username. the initializer automatically sets the VC's username property and VC's title.
+        super.init(nibName: nil, bundle: nil)
+        self.username = username
+        title = username
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,7 +71,6 @@ class FollowerListVC: UIViewController {
     func configureSearchController() {
         let searchController = UISearchController()
         searchController.searchResultsUpdater = self // search controller has to have a delegate, which of course will be our VC.
-        searchController.searchBar.delegate = self // setting our VC to 'listen' to any changes in our searchBar
         searchController.searchBar.placeholder = "Search for a username"
         searchController.obscuresBackgroundDuringPresentation = false // now the collection view is not greyed-out when we activate the search bar.
         navigationItem.searchController = searchController // setting search controller in the navigation controller.
@@ -68,6 +78,7 @@ class FollowerListVC: UIViewController {
     
     func getFollowers(username: String, page: Int) {
         showLoadingView() // this function is taken from the extension of UIViewController in 'UIViewController+Ext' file.
+        isLoadingMoreFollowers = true // mark the start of loading more followers.
         
         NetworkManager.shared.getFollowers(for: username, page: page) { [weak self] result in // our network manager has a strong reference to the FollowerListVC - this can cause a memory leak. So the solution is to make self WEAK.
             guard let self = self else { return } // unwrapping the 'self' so we don't have to make it optional below.
@@ -94,6 +105,7 @@ class FollowerListVC: UIViewController {
             case .failure(let error): // with 'let error' we describe what we get if the case is a failure.
                 self.presentGFAlertOnMainThread(title: "Bad stuff happened", message: error.rawValue, buttonTitle: "OK") // 'rawValue' is an associated type of an enum. in this case it's a String, so in order to have errorMessage comply to the 'message' type in GFAlert, we have to make it a rawValue of the errorMessage - which is a String.
             }
+            self.isLoadingMoreFollowers = false // loading more followers is finished, so we can set it to false.
         }
     }
     
@@ -151,7 +163,7 @@ extension FollowerListVC: UICollectionViewDelegate {
         let height = scrollView.frame.height // height of our screen
         
         if offsetY > contentHeight - height {
-            guard hasMoreFollowers else { return } // execute the code below only if the user has more followers than 100.
+            guard hasMoreFollowers, isLoadingMoreFollowers == false else { return } // execute the code below only if the user has more followers than 100 AND when loading more followers is NOT in a process.
             page += 1
             getFollowers(username: username, page: page)
         }
@@ -170,18 +182,19 @@ extension FollowerListVC: UICollectionViewDelegate {
 }
 
 
-extension FollowerListVC: UISearchResultsUpdating, UISearchBarDelegate { // anytime we change the search results, it's letting us know that something has changed.
+extension FollowerListVC: UISearchResultsUpdating { // anytime we change the search results, it's letting us know that something has changed.
     func updateSearchResults(for searchController: UISearchController) {
-        guard let filter = searchController.searchBar.text, !filter.isEmpty else { return } // our filter is the text in the search bar. once we have that filter, we want to check if it's not empty.
+        guard let filter = searchController.searchBar.text, !filter.isEmpty else { // our filter is the text in the search bar. once we have that filter, we want to check if it's not empty. if it is (whether by deleting the text or tapping the 'cancel' button), go back to the original state of collection view.
+            filteredFollowers.removeAll()
+            updateData(on: followers)
+            isSearching = false
+            return
+        }
         isSearching = true
         filteredFollowers = followers.filter { $0.login.lowercased().contains(filter.lowercased()) } // we are going through our 'followers' array and we are filtering out based on our 'filter' text. because we iterate through all the followers, '$0' is each follower. as we're going through the followers, we want to check their login, make it lowercased so casing is irrelevant when matching, and see if it contains our 'filter' text (also lowercased, for matching purposes).
         updateData(on: filteredFollowers)
     }
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        isSearching = false
-        updateData(on: followers) // when the "Cancel" button is tapped, we want our original followers to appear.
-    }
+
 }
 
 extension FollowerListVC: FollowerListVCDelegate {
@@ -191,7 +204,7 @@ extension FollowerListVC: FollowerListVCDelegate {
         page = 1
         followers.removeAll() // reset the followers array
         filteredFollowers.removeAll()
-        collectionView.setContentOffset(.zero, animated: true) // scroll up to the content view.
+        collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: true) // scroll up to the first row of items.
         getFollowers(username: username, page: page)
     }
 }

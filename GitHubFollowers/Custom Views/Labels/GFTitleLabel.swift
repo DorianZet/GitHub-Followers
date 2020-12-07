@@ -19,11 +19,10 @@ class GFTitleLabel: UILabel {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init(textAlignment: NSTextAlignment, fontSize: CGFloat) {
-        super.init(frame: .zero)
+    convenience init(textAlignment: NSTextAlignment, fontSize: CGFloat) { // convenience initializers first call the designated initializer. In this case, it's init(frame: CGRect) which we override above with our 'configure' function. This is why we no longer have to call 'configure()' both in our init and the designated init, but only in the designated one - as it will always get called with our convenience init.
+        self.init(frame: .zero) // convenience initializers use self.init(), not super.init().
         self.textAlignment = textAlignment
         self.font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
-        configure()
     }
     
     

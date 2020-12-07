@@ -38,6 +38,7 @@ class GFTextField: UITextField {
         autocorrectionType = .no // don't use autocorrection when putting in a user name.
         keyboardType = .default // we can use many kinds of keyboard types for text fields etc., but here a default one is all we need.
         returnKeyType = .go // what return (or ENTER) button says.
+        clearButtonMode = .whileEditing // adds a little button to the text field that clears the text when tapped.
         placeholder = "Enter a username"
     }
     

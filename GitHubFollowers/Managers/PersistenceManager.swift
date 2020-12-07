@@ -53,9 +53,9 @@ enum PersistenceManager {
         do {
             let decoder = JSONDecoder()
             let favorites = try decoder.decode([Follower].self, from: favoritesData)
-            completed(.success(favorites))
+            completed(.success(favorites)) // now, when we use retrieveFavorites in FavoritesListVC and the action is completed, we have favorites - and in the closure we then decide what we want to do with those favorites. Same thing goes for the error. Once we get the error, in our closure we decide what we want to do with it (see 'getFavorites' function in FavoritesListVC to see how we do it).
         } catch {
-            completed(.failure(.unableToFavorite))
+            completed(.failure(.unableToFavorite)) // it's better to use .unableToRetrieveFavorites error here.
         }
     }
     

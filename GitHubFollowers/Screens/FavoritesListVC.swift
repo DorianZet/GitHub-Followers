@@ -7,7 +7,7 @@
 
 import UIKit
 
-class FavoritesListVC: UIViewController {
+class FavoritesListVC: GFDataLoadingVC {
     
     let tableView = UITableView()
     var favorites: [Follower] = []
@@ -79,9 +79,7 @@ extension FavoritesListVC: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let favorite = favorites[indexPath.row]
-        let destVC = FollowerListVC()
-        destVC.username = favorite.login
-        destVC.title = favorite.login
+        let destVC = FollowerListVC(username: favorite.login) // pushing the FollowerListVC, initializing it with the selected username's login.
         
         navigationController?.pushViewController(destVC, animated: true)
     }
@@ -96,7 +94,7 @@ extension FavoritesListVC: UITableViewDataSource, UITableViewDelegate {
         PersistenceManager.updateWith(favorite: favorite, actionType: .remove) { [weak self] (error) in
             guard let self = self else { return }
             
-            guard let error = error else { return } // if error is nil, return, we don't need to do any further because updating the persisting Favorites array was successful.
+            guard let error = error else { return } // if error is nil, return, we don't need to do anything further because updating the persisting Favorites array was successful.
             
             self.presentGFAlertOnMainThread(title: "Unable to remove", message: error.rawValue, buttonTitle: "OK")
             

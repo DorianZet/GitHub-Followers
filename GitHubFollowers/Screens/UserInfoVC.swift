@@ -12,7 +12,7 @@ protocol UserInfoVCDelegate: class {
     func didTapGitHubFollowers(for user: User)
 }
 
-class UserInfoVC: UIViewController {
+class UserInfoVC: GFDataLoadingVC {
     
     let headerView = UIView() // this is a container view for a child view controller (which in this case will be GFUserInfoHeaderVC).
     let itemViewOne = UIView()
@@ -62,7 +62,7 @@ class UserInfoVC: UIViewController {
         self.add(childVC: repoItemVC, to: self.itemViewOne)
         self.add(childVC: followerItemVC, to: self.itemViewTwo)
         self.add(childVC: GFUserInfoHeaderVC(user: user), to: self.headerView) // if we manage to download the user info, present the GFUserInfoHeaderVC in the headerView, showing all the info about the user
-        self.dateLabel.text = "GitHub since \(user.createdAt.convertToDisplayFormat())"
+        self.dateLabel.text = "GitHub since \(user.createdAt.convertToMonthYearFormat())"
     }
     
     func layoutUI() {

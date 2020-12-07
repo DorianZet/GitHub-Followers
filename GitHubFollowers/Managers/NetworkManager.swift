@@ -80,6 +80,7 @@ class NetworkManager {
             do {
                let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
+                decoder.dateDecodingStrategy = .iso8601 // 
                 let user = try decoder.decode(User.self, from: data) // we want a single user, so we try to decode it. We want to create that user of type 'User' from 'data', which is in 'guard let data = data' line above.
                 completed(.success(user)) // if all goes well, we get a user - we described that in the function parameters 'Result<User' - which goes for the success case.
             } catch { // catching the error.
@@ -88,5 +89,39 @@ class NetworkManager {
         }
         
         task.resume() // starts the network call.
+    }
+    
+    func downloadImage(from urlString: String, completed: @escaping (UIImage?) -> Void) {
+        let cacheKey = NSString(string: urlString) // setting the image's cache key, which will be its url string.
+        
+        if let image = cache.object(forKey: cacheKey) { // if the image is already in the cache, set the avatar image as this image in the cache and return.
+            completed(image)
+            return
+        }
+        
+        guard let url = URL(string: urlString) else {
+            completed(nil) // we don't return any error, because when anything fails when getting the image, we have our octocat placeholder to show if an image is unavailable.
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
+            // As we don't have to deal with any separate error cases (if anything goes wrong, we just get nil in return), we can combine all the conditions in one 'guard' statement by separating them with commas.
+            guard let self = self,
+                  error == nil,
+                  let response = response as? HTTPURLResponse, response.statusCode == 200,
+                  let data = data,
+                  let image = UIImage(data: data) else {
+                    completed(nil)
+                    return
+                  }
+                  
+            self.cache.setObject(image, forKey: cacheKey) // set the image into the cache (the cache key of the image is the url string from where we get the image)
+            
+            DispatchQueue.main.async { // because we are on a background thread, we have to update our UI on the main one - this is why the 'completed' closure will take the 'image' object and update the UI with it on a main thread.
+                completed(image)
+            }
+        }
+        
+        task.resume()
     }
 }

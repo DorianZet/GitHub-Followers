@@ -11,7 +11,6 @@ class GFButton: UIButton {
 
     override init(frame: CGRect) { // we have to override the initializer if we do custom stuff in it.
         super.init(frame: frame) // first we let all Apple's things initialize.
-        
         configure()
     }
     
@@ -19,11 +18,10 @@ class GFButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init(backgroundColor: UIColor, title: String) {
-        super.init(frame: .zero) // normally when you initialize you have to give it a frame, but we will do it with auto-layout constraints anyway, so we can initialize it with a frame of .zero.
+    convenience init(backgroundColor: UIColor, title: String) {
+        self.init(frame: .zero) // normally when you initialize you have to give it a frame, but we will do it with auto-layout constraints anyway, so we can initialize it with a frame of .zero.
         self.backgroundColor = backgroundColor
         self.setTitle(title, for: .normal)
-        configure()
     }
     
     private func configure() { // 'private' means it can be called only in this class.
