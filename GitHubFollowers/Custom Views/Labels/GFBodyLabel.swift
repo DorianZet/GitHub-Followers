@@ -26,6 +26,7 @@ class GFBodyLabel: UILabel {
     private func configure() {
         textColor = .secondaryLabel // good choice for a body or just a subtitle label.
         font = UIFont.preferredFont(forTextStyle: .body)
+        adjustsFontForContentSizeCategory = true // will dynamically react to any changes in the font settings in iOS.octoca
         adjustsFontSizeToFitWidth = true
         minimumScaleFactor = 0.75
         lineBreakMode = .byWordWrapping

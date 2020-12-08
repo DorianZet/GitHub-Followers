@@ -14,7 +14,6 @@ class GFItemInfoVC: UIViewController { // This class works as a base for GFRepoI
     let actionButton = GFButton()
     
     var user: User!
-    weak var delegate: UserInfoVCDelegate! // every time we deal with the delegates, THEY NEED TO BE WEAK so that we avoid the retain cycle!
     
     init(user: User) { // now when we initialize a GFUserInfoHeaderVC, we can pass a user to it
         super.init(nibName: nil, bundle: nil)
@@ -55,8 +54,7 @@ class GFItemInfoVC: UIViewController { // This class works as a base for GFRepoI
     }
     
     private func layoutUI() {
-        view.addSubview(stackView)
-        view.addSubview(actionButton)
+        view.addSubviews(actionButton, stackView)
         
         stackView.translatesAutoresizingMaskIntoConstraints = false
         let padding: CGFloat = 20

@@ -34,6 +34,10 @@ class GFAlertVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.75)
+        
+        view.addSubviews(containerView)
+        containerView.addSubviews(titleLabel, actionButton, messageLabel) // we add the titleLabel, actionButton and messageLabel to containerView, not the general view.
+        
         configureContainerView()
         configureTitleLabel()
         configureActionButton()
@@ -42,8 +46,6 @@ class GFAlertVC: UIViewController {
     
     
     func configureContainerView() {
-        view.addSubview(containerView)
-        
         NSLayoutConstraint.activate([
             containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -53,7 +55,6 @@ class GFAlertVC: UIViewController {
     }
     
     func configureTitleLabel() {
-        containerView.addSubview(titleLabel) // we add the titleLabel to containerView, not the general view.
         titleLabel.text = alertTitle ?? "Something went wrong" // in case alertTitle is nil, "Something went wrong" will appear.
         
         NSLayoutConstraint.activate([
@@ -66,7 +67,6 @@ class GFAlertVC: UIViewController {
     
     // Because we want our messageLabel to fill the space between the titleLabel and actionButton, first we need to set the constraints for titleLabel and actionButton.
     func configureActionButton() {
-        containerView.addSubview(actionButton)
         actionButton.setTitle(buttonTitle ?? "OK", for: .normal)
         actionButton.addTarget(self, action: #selector(dismissVC), for: .touchUpInside)
         
@@ -79,7 +79,6 @@ class GFAlertVC: UIViewController {
     }
     
     func configureMessageLabel() {
-        containerView.addSubview(messageLabel)
         messageLabel.text = message ?? "Unable to complete request"
         messageLabel.numberOfLines = 4
         

@@ -21,7 +21,7 @@ class SearchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        
+        view.addSubviews(logoImageView, usernameTextField, callToActionButton)
         configureLogoImageView()
         configureTextField()
         configureCallToActionButton()
@@ -55,7 +55,6 @@ class SearchVC: UIViewController {
 
     
     func configureLogoImageView() {
-        view.addSubview(logoImageView)
         logoImageView.translatesAutoresizingMaskIntoConstraints = false
         logoImageView.image = Images.ghLogo
         
@@ -72,7 +71,6 @@ class SearchVC: UIViewController {
     }
     
     func configureTextField() {
-        view.addSubview(usernameTextField)
         usernameTextField.delegate = self // the delegate of usernameTextField is SearchVC. It means it will 'listen' to the textField now.
         
         // we don't have to call '.translatesAutoResizing... = false' because we already did that in the GFTextField initializer.
@@ -86,7 +84,6 @@ class SearchVC: UIViewController {
     }
     
     func configureCallToActionButton() {
-        view.addSubview(callToActionButton)
         callToActionButton.addTarget(self, action: #selector(pushFollowerListVC), for: .touchUpInside) // wherever we tap the callToActionButton, 'pushFollowerListVC' action will be called.
         
         NSLayoutConstraint.activate([
