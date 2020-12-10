@@ -11,7 +11,6 @@ enum ItemInfoType {
     case repos, gists, followers, following
 }
 
-
 class GFItemInfoView: UIView {
 
     let symbolImageView = UIImageView()
@@ -21,7 +20,6 @@ class GFItemInfoView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         configure()
-        
     }
     
     required init?(coder: NSCoder) {
@@ -70,5 +68,4 @@ class GFItemInfoView: UIView {
         }
         countLabel.text = String(count)
     }
-    
 }

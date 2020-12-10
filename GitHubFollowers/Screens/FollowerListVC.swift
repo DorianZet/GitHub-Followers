@@ -83,26 +83,29 @@ class FollowerListVC: GFDataLoadingVC {
             
             switch result {
             case .success(let followers): // with 'let followers' we describe what we get if the case is a success.
-                if followers.count < 100 {
-                    self.hasMoreFollowers = false // when we get the followers, set 'hasMoreFollowers' to false if there are less than 100 of them.
-                }
-                self.followers.append(contentsOf: followers) // add downloaded followers to the array of the followers.
-                
-                if self.followers.isEmpty {
-                    let message = "This user doesn't have any followers. Go follow them 😄."
-                    DispatchQueue.main.async {
-                        self.showEmptyStateView(with: message, in: self.view)
-                        return
-                    }
-                }
-                
-                self.updateData(on: self.followers)
+                self.updateUI(with: followers)
 
             case .failure(let error): // with 'let error' we describe what we get if the case is a failure.
                 self.presentGFAlertOnMainThread(title: "Bad stuff happened", message: error.rawValue, buttonTitle: "OK") // 'rawValue' is an associated type of an enum. in this case it's a String, so in order to have errorMessage comply to the 'message' type in GFAlert, we have to make it a rawValue of the errorMessage - which is a String.
             }
             self.isLoadingMoreFollowers = false // loading more followers is finished, so we can set it to false.
         }
+    }
+    
+    func updateUI(with followers: [Follower]) {
+        if followers.count < 100 {
+            hasMoreFollowers = false // when we get the followers, set 'hasMoreFollowers' to false if there are less than 100 of them.
+        }
+        self.followers.append(contentsOf: followers) // add downloaded followers to the array of the followers in the VC.
+        
+        if followers.isEmpty {
+            let message = "This user doesn't have any followers. Go follow them 😄."
+            DispatchQueue.main.async {
+                self.showEmptyStateView(with: message, in: self.view)
+                return
+            }
+        }
+        updateData(on: followers)
     }
     
     func configureDataSource() {
@@ -132,25 +135,27 @@ class FollowerListVC: GFDataLoadingVC {
             
             switch result {
             case .success(let user):
-                let favorite = Follower(login: user.login, avatarUrl: user.avatarUrl)
-                PersistenceManager.updateWith(favorite: favorite, actionType: .add) { [weak self] (error) in
-                    guard let self = self else { return }
-                    guard let error = error else {
-                        self.presentGFAlertOnMainThread(title: "Success!", message: "You have successfully favorited this user 😃!", buttonTitle: "Woohoo!")
-                        return
-                    }
-                    
-                    self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "OK") // if saving is unsuccessful, present the alert controller with the error.
-                }
+                self.addUserToFavorites(user: user)
             case .failure(let error):
                 self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "OK")
-
             }
         }
     }
     
-
+    func addUserToFavorites(user: User) {
+        let favorite = Follower(login: user.login, avatarUrl: user.avatarUrl)
+        PersistenceManager.updateWith(favorite: favorite, actionType: .add) { [weak self] (error) in
+            guard let self = self else { return }
+            guard let error = error else {
+                self.presentGFAlertOnMainThread(title: "Success!", message: "You have successfully favorited this user 😃!", buttonTitle: "Woohoo!")
+                return
+            }
+            
+            self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "OK") // if saving is unsuccessful, present the alert controller with the error.
+        }
+    }
 }
+
 
 extension FollowerListVC: UICollectionViewDelegate {
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -176,7 +181,6 @@ extension FollowerListVC: UICollectionViewDelegate {
         present(navController, animated: true) // instead of just presenting destVC, show the navigation controller that our destVC is embedded in.
     }
 }
-
 
 extension FollowerListVC: UISearchResultsUpdating { // anytime we change the search results, it's letting us know that something has changed.
     func updateSearchResults(for searchController: UISearchController) {

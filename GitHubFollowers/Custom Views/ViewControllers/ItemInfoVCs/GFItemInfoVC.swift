@@ -8,6 +8,7 @@
 import UIKit
 
 class GFItemInfoVC: UIViewController { // This class works as a base for GFRepoItemVC and GFFollowerItemVC.
+   
     let stackView = UIStackView()
     let itemInfoViewOne = GFItemInfoView()
     let itemInfoViewTwo = GFItemInfoView()
@@ -71,6 +72,4 @@ class GFItemInfoVC: UIViewController { // This class works as a base for GFRepoI
             actionButton.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
-    
-
 }

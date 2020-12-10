@@ -14,8 +14,6 @@ class GFTextField: UITextField {
         configure()
     }
     
-    
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -35,11 +33,10 @@ class GFTextField: UITextField {
         minimumFontSize = 12
         
         backgroundColor = .tertiarySystemBackground
-        autocorrectionType = .no // don't use autocorrection when putting in a user name.
+        autocorrectionType = .no // don't use the autocorrection when putting in a user name.
         keyboardType = .default // we can use many kinds of keyboard types for text fields etc., but here a default one is all we need.
         returnKeyType = .go // what return (or ENTER) button says.
         clearButtonMode = .whileEditing // adds a little button to the text field that clears the text when tapped.
         placeholder = "Enter a username"
     }
-    
 }

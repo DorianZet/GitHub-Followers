@@ -38,6 +38,4 @@ class GFFollowerItemVC: GFItemInfoVC { // we inherit all the logic from GFItemIn
     override func actionButtonTapped() {
         delegate.didTapGitHubFollowers(for: user) // When we tap the action button in this VC, it says to its delegate (which is UserInfoVC) that the follower button was tapped.
     }
-    
-    
 }

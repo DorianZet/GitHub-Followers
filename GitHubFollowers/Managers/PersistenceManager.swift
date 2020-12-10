@@ -21,22 +21,22 @@ enum PersistenceManager {
     static func updateWith(favorite: Follower, actionType: PersistenceActionType, completed: @escaping (GFError?) -> Void) {
         retrieveFavorites { (result) in
             switch result {
-            case .success(let favorites):
-                var retrievedFavorites = favorites
+            case .success(var favorites): // we can set the thing that we get when the result of closure is successful as 'var' for a further modification of it.
                 
                 switch actionType {
                 case .add:
-                    guard !retrievedFavorites.contains(favorite) else { // checking if our favorites don't have the user already.
+                    guard !favorites.contains(favorite) else { // checking if our favorites don't have the user already.
                         completed(.alreadyInFavorites)
                         return
                     }
                     
-                    retrievedFavorites.append(favorite)
+                    favorites.append(favorite)
+                    
                 case.remove:
-                    retrievedFavorites.removeAll { $0.login == favorite.login } // anywhere in retrievedFavorites where the login equals the favorite login, remove it from retrievedFavorites.
+                    favorites.removeAll { $0.login == favorite.login } // anywhere in retrievedFavorites where the login equals the favorite login, remove it from retrievedFavorites.
                 }
                 
-                completed(save(favorites: retrievedFavorites)) // if the update was successful, save the favorites. we can use the save(favorites:) method here, as it returns an error, which is required for this closure.
+                completed(save(favorites: favorites)) // if the update was successful, save the favorites. we can use the save(favorites:) method here, as it returns an error, which is required for this closure.
             
             case .failure(let error):
                 completed(error)
@@ -46,7 +46,7 @@ enum PersistenceManager {
     
     static func retrieveFavorites(completed: @escaping (Result<[Follower], GFError>) -> Void) {
         guard let favoritesData = defaults.object(forKey: Keys.favorites) as? Data else { // we have to tell Swift that our object is of a 'Data' type.
-            completed(.success([])) // returning an empty array of followers.
+            completed(.success([])) // returning an empty array of followers if we haven't favorited any.
             return
         }
         

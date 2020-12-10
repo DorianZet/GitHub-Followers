@@ -38,6 +38,4 @@ class GFRepoItemVC: GFItemInfoVC { // we inherit all the logic from GFItemInfoVC
     override func actionButtonTapped() {
         delegate.didTapGitHubProfile(for: user) // by tapping the button, we send the action to our delegate (which is UserInfoVC).
     }
-    
-    
 }

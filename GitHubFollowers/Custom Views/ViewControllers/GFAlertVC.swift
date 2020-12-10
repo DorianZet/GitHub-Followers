@@ -34,7 +34,6 @@ class GFAlertVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.75)
-        
         view.addSubviews(containerView)
         containerView.addSubviews(titleLabel, actionButton, messageLabel) // we add the titleLabel, actionButton and messageLabel to containerView, not the general view.
         
@@ -43,7 +42,6 @@ class GFAlertVC: UIViewController {
         configureActionButton()
         configureMessageLabel()
     }
-    
     
     func configureContainerView() {
         NSLayoutConstraint.activate([
@@ -90,10 +88,7 @@ class GFAlertVC: UIViewController {
         ])
     }
     
-    
     @objc func dismissVC() {
         dismiss(animated: true)
     }
-    
-   
 }

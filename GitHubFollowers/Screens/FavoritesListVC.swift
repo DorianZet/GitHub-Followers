@@ -35,6 +35,7 @@ class FavoritesListVC: GFDataLoadingVC {
         tableView.rowHeight = 80 // make every table cell of a height 80.
         tableView.delegate = self // our VC now "listens" to the tableView and acts upon the changes in it
         tableView.dataSource = self // our VC now provides the data for the tableView (the var 'favorites' property.)
+        tableView.removeExcessCells() // using a function from the table view extension. Now the bottom part of the table - if empty - doesn't have cells.
         
         tableView.register(FavoriteCell.self, forCellReuseIdentifier: FavoriteCell.reuseID) // registering the cell we want.
     }
@@ -45,23 +46,27 @@ class FavoritesListVC: GFDataLoadingVC {
             
             switch result {
             case .success(let favorites):
+                self.updateUI(with: favorites)
                 
-                if favorites.isEmpty {
-                    self.showEmptyStateView(with: "No Favorites?\nAdd one on the follower screen.", in: self.view)
-                } else {
-                    self.favorites = favorites
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                        self.view.bringSubviewToFront(self.tableView) // making sure that our tableView will be upfront and showing when there is at least one favorite in the array.
-                    }
-                }
             case .failure(let error):
                 self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "OK")
             }
         }
     }
-
+    
+    func updateUI(with favorites: [Follower]) {
+        if favorites.isEmpty {
+            self.showEmptyStateView(with: "No Favorites?\nAdd one on the follower screen.", in: self.view)
+        } else {
+            self.favorites = favorites
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+                self.view.bringSubviewToFront(self.tableView) // making sure that our tableView will be upfront and showing when there is at least one favorite in the array.
+            }
+        }
+    }
 }
+
 
 extension FavoritesListVC: UITableViewDataSource, UITableViewDelegate {
     
@@ -88,19 +93,19 @@ extension FavoritesListVC: UITableViewDataSource, UITableViewDelegate {
         guard editingStyle == .delete else { return }
         
         let favorite = favorites[indexPath.row]
-        favorites.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: .left)
         
         PersistenceManager.updateWith(favorite: favorite, actionType: .remove) { [weak self] (error) in
             guard let self = self else { return }
             
-            guard let error = error else { return } // if error is nil, return, we don't need to do anything further because updating the persisting Favorites array was successful.
+            guard let error = error else { // if we don't have any error removing a favorite from persistence manager - update our UI by removing the favorite from the table view:
+                self.favorites.remove(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: .left)
+                return
+            } // if error is nil, return, we don't need to do anything further because updating the persisting Favorites array was successful.
             
             self.presentGFAlertOnMainThread(title: "Unable to remove", message: error.rawValue, buttonTitle: "OK")
             
             
         }
     }
-    
-    
 }

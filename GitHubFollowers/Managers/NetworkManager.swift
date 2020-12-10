@@ -14,7 +14,6 @@ class NetworkManager {
     
     private init() {}
     
-    
     func getFollowers(for username: String, page: Int, completed: @escaping (Result<[Follower], GFError>) -> Void) { // the 'GFError' is the enum we created in 'Utilities' folder. The result can be a success - which then returns an array of 'Follower', or a failure - which then returns a GFError (which complies to 'Error' protocol - otherwise we wouldn't be able to use it).
         let endpoint = baseURL + "\(username)/followers?per_page=100&page=\(page)" // we make a call for 100 users at once. we can change it to 50 or 60 if need be.
         

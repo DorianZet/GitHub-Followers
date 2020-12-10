@@ -33,5 +33,4 @@ class GFTitleLabel: UILabel {
         lineBreakMode = .byTruncatingTail // if the username is too long, it will add '...' and truncate the name.
         translatesAutoresizingMaskIntoConstraints = false
     }
-    
 }

@@ -13,6 +13,9 @@ protocol UserInfoVCDelegate: class {
 
 class UserInfoVC: GFDataLoadingVC {
     
+    let scrollView = UIScrollView()
+    let contentView = UIView() // scroll view content view, where we put all the UI elements.
+    
     let headerView = UIView() // this is a container view for a child view controller (which in this case will be GFUserInfoHeaderVC).
     let itemViewOne = UIView()
     let itemViewTwo = UIView()
@@ -25,6 +28,7 @@ class UserInfoVC: GFDataLoadingVC {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
+        configureScrollView()
         layoutUI()
         getUserInfo()
     }
@@ -33,6 +37,20 @@ class UserInfoVC: GFDataLoadingVC {
         view.backgroundColor = .systemBackground
         let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissVC))
         navigationItem.rightBarButtonItem = doneButton
+    }
+    
+    func configureScrollView() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        
+        scrollView.pinToEdges(of: view) // using the extension to pin the edges of our scroll view to the general view.
+        contentView.pinToEdges(of: scrollView) // pinning the edges of our content view to the scroll view.
+        
+        NSLayoutConstraint.activate([
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            contentView.heightAnchor.constraint(equalToConstant: 600) // manually dialed-in height for the scroll view, which look good on iPhone SE. As the content will be all layed out at once on all other iPhones, scroll view will be automatically disabled there.
+        ])
+        
     }
     
     func getUserInfo() {
@@ -67,17 +85,17 @@ class UserInfoVC: GFDataLoadingVC {
         itemViews = [headerView, itemViewOne, itemViewTwo, dateLabel]
         
         for itemView in itemViews {
-            view.addSubview(itemView) // adding the subviews by going through them in a loop.
+            contentView.addSubview(itemView) // adding the subviews by going through them in a loop. NOTE THAT we add the itemViews to the contentView, NOT the general view.
             itemView.translatesAutoresizingMaskIntoConstraints = false
             
             NSLayoutConstraint.activate([ // putting the leading and trailing anchor in the loop, as they are the same for all the item views.
-                itemView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-                itemView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
+                itemView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+                itemView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
             ])
         }
         
         NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 210),
             
             itemViewOne.topAnchor.constraint(equalTo: headerView.bottomAnchor, constant: padding),

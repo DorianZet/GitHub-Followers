@@ -13,4 +13,14 @@ extension UIView {
             addSubview(view)
         }
     }
+    
+    func pinToEdges(of superview: UIView) { // useful extension when we want to pin the view to the edges of the superview.
+        translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            topAnchor.constraint(equalTo: superview.topAnchor),
+            leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+            trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+            bottomAnchor.constraint(equalTo: superview.bottomAnchor)
+        ])
+    }
 }
