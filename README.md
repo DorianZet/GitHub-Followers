@@ -1,5 +1,4 @@
 <!-- PROJECT LOGO -->
-![Icon]()
 
 <br />
 <p align="center">
