@@ -33,7 +33,7 @@ The app is essentially a GitHub API-based user browser. By getting a user, we ga
 • avatar image URL<br>
 • name<br>
 • location<br>
-• etc...
+• and some other entities, among which are the user's followers - the main point of this app!
 
 Among the things that I've learnt/trained, here are the most essential ones for me:<br>
 • writing code 100% programmatically<br>
