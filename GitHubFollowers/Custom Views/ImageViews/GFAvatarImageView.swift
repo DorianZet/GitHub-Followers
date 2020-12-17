@@ -26,6 +26,7 @@ class GFAvatarImageView: UIImageView {
         clipsToBounds = true
         image = placeholderImage
         translatesAutoresizingMaskIntoConstraints = false
+        contentMode = .scaleAspectFill
     }
     
     func downloadImage(from url: String) {

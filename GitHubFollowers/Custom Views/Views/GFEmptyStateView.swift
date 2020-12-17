@@ -33,9 +33,8 @@ class GFEmptyStateView: UIView {
     }
     
     private func configureMessageLabel() {
-        messageLabel.numberOfLines = 3
         messageLabel.textColor = .secondaryLabel
-
+        messageLabel.numberOfLines = 3
         let labelCenterYConstant: CGFloat = DeviceTypes.isiPhoneSE || DeviceTypes.isiPhone8Zoomed ? -80 : -150 // if our device is iPhone SE or iPhone 8 zoomed - set the top anchor of the message label to -80. If not, set it to -150.
                 
         NSLayoutConstraint.activate([

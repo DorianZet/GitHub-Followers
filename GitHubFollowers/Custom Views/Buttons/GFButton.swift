@@ -29,6 +29,11 @@ class GFButton: UIButton {
         titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
         setTitleColor(.white, for: .normal)
         translatesAutoresizingMaskIntoConstraints = false
+        
+        self.addTarget(self, action: #selector(buttonUp), for: .touchUpInside)
+        self.addTarget(self, action: #selector(buttonDown), for: .touchDown)
+        self.addTarget(self, action: #selector(buttonCancel), for: .touchDragExit)
+        self.addTarget(self, action: #selector(buttonDragInside), for: .touchDragInside)
     }
     
     func set(backgroundColor: UIColor, title: String) {
@@ -36,4 +41,32 @@ class GFButton: UIButton {
         setTitle(title, for: .normal)
     }
     
+    @objc func buttonUp(_ sender: UIButton) {
+        animateButtonAlpha(buttonAnimated: sender, toAlpha: 1)
+    }
+
+    @objc func buttonDown(_ sender: UIButton) {
+        animateButtonAlpha(buttonAnimated: sender, toAlpha: 0.6)
+    }
+
+    @objc func buttonCancel(_ sender: UIButton) {
+        animateButtonAlpha(buttonAnimated: sender, toAlpha: 1)
+    }
+
+    @objc func buttonDragInside(_ sender: UIButton) {
+        animateButtonAlpha(buttonAnimated: sender, toAlpha: 0.6)
+    }
+    
+    private func animateButtonAlpha(buttonAnimated button: UIButton, toAlpha alpha: CGFloat) {
+        UIView.animate(withDuration: 0.1) {
+            button.alpha = alpha
+        }
+    }
+    
 }
+
+
+
+
+
+

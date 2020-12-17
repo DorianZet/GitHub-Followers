@@ -14,4 +14,6 @@ enum GFError: String, Error { // it has a raw value of string and confirms to 'E
     case invalidData = "The data received from the server was invalid. Please try again."
     case unableToFavorite = "There was an error favoriting this user. Please try again."
     case alreadyInFavorites = "You've already favorited this user. You must really like them!"
+    
+    case dogsDownloadError = "There has been some problem with Dog API."
 }

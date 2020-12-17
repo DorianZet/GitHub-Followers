@@ -47,3 +47,7 @@ enum DeviceTypes {
     }
 }
 
+enum urlList {
+    static let getDogsImagesUrl = "https://dog.ceo/api/breeds/image/random/"
+}
+

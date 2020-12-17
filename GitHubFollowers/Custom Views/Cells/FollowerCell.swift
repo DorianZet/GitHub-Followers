@@ -25,10 +25,14 @@ class FollowerCell: UICollectionViewCell {
     func set(follower: Follower) {
         usernameLabel.text = follower.login
         avatarImageView.downloadImage(from: follower.avatarUrl)
+        print("\(follower.login) is downloading image from url: \(follower.avatarUrl)")
     }
     
     private func configure() {
         addSubviews(avatarImageView, usernameLabel)
+        
+        avatarImageView.layer.borderWidth = 3
+        avatarImageView.layer.borderColor = UIColor.black.cgColor
         
         let padding: CGFloat = 8
         

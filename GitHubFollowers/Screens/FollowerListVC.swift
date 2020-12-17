@@ -24,6 +24,8 @@ class FollowerListVC: GFDataLoadingVC {
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Follower>! // Diffable Data Source has to know about the section where it should work (Section) and about our collection view items (Follower)
     
+    var isDogModeOn = false
+    
     init(username: String) { // now when we push the FollowerListVC, we can initialize it with the username. the initializer automatically sets the VC's username property and VC's title.
         super.init(nibName: nil, bundle: nil)
         self.username = username
@@ -46,10 +48,13 @@ class FollowerListVC: GFDataLoadingVC {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: true) // this gets rid of a bug with navbar when transitioning between this VC and searchVC by dragging your finger from the left edge of the screen.
+        
+        collectionView.setBackgroundColor(forDogMode: GlobalVariables.isDogModeOn)
+        view.setBackgroundColor(forDogMode: GlobalVariables.isDogModeOn)
     }
     
     func configureViewController() {
-        view.backgroundColor = .systemBackground
+        view.setBackgroundColor(forDogMode: isDogModeOn)
         navigationController?.navigationBar.prefersLargeTitles = true
         
         let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
@@ -60,7 +65,7 @@ class FollowerListVC: GFDataLoadingVC {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: UIHelper.createThreeColumnFlowLayout(in: view))
         view.addSubview(collectionView)
         collectionView.delegate = self // now our VC "listens" to the collectionView and will execute code once it meets its requirements set in its extension.
-        collectionView.backgroundColor = .systemBackground
+        collectionView.setBackgroundColor(forDogMode: isDogModeOn)
         collectionView.register(FollowerCell.self, forCellWithReuseIdentifier: FollowerCell.reuseID)
     }
     
@@ -79,24 +84,62 @@ class FollowerListVC: GFDataLoadingVC {
         NetworkManager.shared.getFollowers(for: username, page: page) { [weak self] result in // our network manager has a strong reference to the FollowerListVC - this can cause a memory leak. So the solution is to make self WEAK.
             guard let self = self else { return } // unwrapping the 'self' so we don't have to make it optional below.
             
-            self.dismissLoadingView() // once the loading finishes, dismiss the loading view (the one with spinning activity indicator).
+            if self.isDogModeOn == false {
+                self.dismissLoadingView() // once the loading finishes, dismiss the loading view (the one with spinning activity indicator).
+            }
             
             switch result {
             case .success(let followers): // with 'let followers' we describe what we get if the case is a success.
-                self.updateUI(with: followers)
+
+                if self.isDogModeOn == true {
+                    self.getDogs(for: followers, numberOfDogs: followers.count)
+                } else {
+                    self.updateUI(with: followers)
+                }
 
             case .failure(let error): // with 'let error' we describe what we get if the case is a failure.
                 self.presentGFAlertOnMainThread(title: "Bad stuff happened", message: error.rawValue, buttonTitle: "OK") // 'rawValue' is an associated type of an enum. in this case it's a String, so in order to have errorMessage comply to the 'message' type in GFAlert, we have to make it a rawValue of the errorMessage - which is a String.
+                if self.isDogModeOn == true {
+                    self.dismissLoadingView()
+                }
             }
-            self.isLoadingMoreFollowers = false // loading more followers is finished, so we can set it to false.
+            if self.isDogModeOn == false {
+                self.isLoadingMoreFollowers = false // loading more followers is finished, so we can set it to false.
+            }
+        }
+    }
+    
+    func getDogs(for followers: [Follower], numberOfDogs: Int) {
+        NetworkManager.shared.getRandomDogs(numberOfDogs: followers.count) { [weak self] (result) in
+            guard let self = self else { return }
+            
+            self.dismissLoadingView()
+            
+            switch result {
+            case .success(let dogs):
+                var newFollowers = followers
+
+                if !followers.isEmpty {
+                    var followerIndex = 0
+                    for eachDogMessage in dogs.message {
+                        newFollowers[followerIndex].avatarUrl = eachDogMessage // we are switching the original avatar URLs with dog image URLS.
+                        followerIndex += 1
+                    }
+                }
+    
+                self.updateUI(with: newFollowers)
+            case .failure(let error):
+                self.presentGFAlertOnMainThread(title: "Woof! :(", message: error.rawValue, buttonTitle: "OK")
+            }
+            self.isLoadingMoreFollowers = false
         }
     }
     
     func updateUI(with followers: [Follower]) {
-        if followers.count < 100 {
+        if followers.count < 50 {
             hasMoreFollowers = false // when we get the followers, set 'hasMoreFollowers' to false if there are less than 100 of them.
         }
-        self.followers.append(contentsOf: followers) // add downloaded followers to the array of the followers in the VC.
+        self.followers.append(contentsOf: followers)
         
         if followers.isEmpty {
             let message = "This user doesn't have any followers. Go follow them 😄."
@@ -105,7 +148,7 @@ class FollowerListVC: GFDataLoadingVC {
                 return
             }
         }
-        updateData(on: followers)
+        updateData(on: self.followers)
     }
     
     func configureDataSource() {
@@ -158,13 +201,14 @@ class FollowerListVC: GFDataLoadingVC {
 
 
 extension FollowerListVC: UICollectionViewDelegate {
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y // the y offset that gets incremented the more we scroll down.
         let contentHeight = scrollView.contentSize.height // height of our content view (for example, if we had 3000 followers, the content view height would be thousands of points!)
         let height = scrollView.frame.height // height of our screen
         
         if offsetY > contentHeight - height {
-            guard hasMoreFollowers, isLoadingMoreFollowers == false else { return } // execute the code below only if the user has more followers than 100 AND when loading more followers is NOT in a process.
+            guard hasMoreFollowers, isLoadingMoreFollowers == false else { return } // execute the code below only if the user has more followers than 50 AND when loading more followers is NOT in a process.
             page += 1
             getFollowers(username: username, page: page)
         }
@@ -177,6 +221,7 @@ extension FollowerListVC: UICollectionViewDelegate {
         let destVC = UserInfoVC()
         destVC.username = follower.login // passing the tapped follower's login to the 'username' property in destVC.
         destVC.delegate = self // FollowerListVC is now "listening" to the UserInfoVC
+        destVC.isDogModeOn = isDogModeOn
         let navController = UINavigationController(rootViewController: destVC) // create the navigation controller for our destVC.
         present(navController, animated: true) // instead of just presenting destVC, show the navigation controller that our destVC is embedded in.
     }

@@ -23,4 +23,16 @@ extension UIView {
             bottomAnchor.constraint(equalTo: superview.bottomAnchor)
         ])
     }
+    
+    func setBackgroundColor(forDogMode: Bool) {
+        if forDogMode == true {
+            if traitCollection.userInterfaceStyle == .dark {
+                backgroundColor = .secondarySystemBackground
+            } else {
+                backgroundColor = .systemYellow
+            }
+        } else {
+            backgroundColor = .systemBackground
+        }
+    }
 }

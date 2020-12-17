@@ -29,6 +29,9 @@ class FavoriteCell: UITableViewCell {
     
     private func configure() {
         addSubviews(avatarImageView, usernameLabel)
+        
+        avatarImageView.layer.borderWidth = 2
+        avatarImageView.layer.borderColor = UIColor.black.cgColor
 
         accessoryType = .disclosureIndicator
         let padding: CGFloat = 12

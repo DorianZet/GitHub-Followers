@@ -25,6 +25,8 @@ class UserInfoVC: GFDataLoadingVC {
     var username: String!
     weak var delegate: UserInfoVCDelegate!
     
+    var isDogModeOn = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
@@ -34,7 +36,7 @@ class UserInfoVC: GFDataLoadingVC {
     }
     
     func configureViewController() {
-        view.backgroundColor = .systemBackground
+        view.setBackgroundColor(forDogMode: isDogModeOn)
         let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissVC))
         navigationItem.rightBarButtonItem = doneButton
     }

@@ -8,21 +8,28 @@
 import UIKit
 
 class SearchVC: UIViewController {
-
+    
+    var dogConfetti = GFDogEmitterLayerView()
     let logoImageView = UIImageView()
     let usernameTextField = GFTextField()
+    let pugView = GFPugDogModeView()
+    let dogModeButton = GFButton(backgroundColor: .systemRed, title: "Dog mode!")
     let callToActionButton = GFButton(backgroundColor: .systemGreen, title: "Get Followers")
     
+    var isDogModeOn = false
+            
     var isUsernameEntered: Bool {
         return !usernameTextField.text!.isEmpty // isUsernameEntered will be 'true' only when usernameTextField is not empty.
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        view.addSubviews(logoImageView, usernameTextField, callToActionButton)
+        view.setBackgroundColor(forDogMode: isDogModeOn)
+        view.addSubviews(logoImageView, usernameTextField, callToActionButton, dogModeButton, dogConfetti, pugView)
         configureLogoImageView()
         configureTextField()
+        configurePugView()
+        configureDogModeButton()
         configureCallToActionButton()
         createDismissKeyboardTapGesture()
     }
@@ -47,7 +54,30 @@ class SearchVC: UIViewController {
         usernameTextField.resignFirstResponder() // hide the keyboard when the new VC is pushed.
         
         let followerListVC = FollowerListVC(username: usernameTextField.text!)
+        followerListVC.isDogModeOn = isDogModeOn
         navigationController?.pushViewController(followerListVC, animated: true)
+    }
+    
+    @objc func toggleDogMode() {
+        if isDogModeOn == false {
+            GlobalVariables.isDogModeOn = true
+            isDogModeOn = true
+            
+            dogConfetti.emit(with: [.emoji("🐾", nil)], for: 2)
+            UIView.animate(withDuration: 0.2) {
+                self.view.setBackgroundColor(forDogMode: self.isDogModeOn)
+            }
+            pugView.animatePugUp()
+            
+        } else {
+            GlobalVariables.isDogModeOn = false
+            isDogModeOn = false
+            
+            UIView.animate(withDuration: 0.2) {
+                self.view.setBackgroundColor(forDogMode: self.isDogModeOn)
+            }
+            pugView.animatePugDown()
+        }
     }
 
     func configureLogoImageView() {
@@ -74,6 +104,27 @@ class SearchVC: UIViewController {
             usernameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50), // 50 points from the leading anchor.
             usernameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50), // 50 points from the trailing anchor. When dealing with trailing anchors, we need to make the constant numbers negative!
             usernameTextField.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    func configurePugView() {
+        view.sendSubviewToBack(pugView)
+        NSLayoutConstraint.activate([
+            pugView.bottomAnchor.constraint(equalTo: dogModeButton.topAnchor),
+            pugView.leadingAnchor.constraint(equalTo: dogModeButton.leadingAnchor, constant: 50),
+            pugView.trailingAnchor.constraint(equalTo: dogModeButton.trailingAnchor, constant: -50),
+            pugView.heightAnchor.constraint(equalTo: dogModeButton.widthAnchor, constant: -100)
+        ])
+    }
+    
+    func configureDogModeButton() {
+        dogModeButton.addTarget(self, action: #selector(toggleDogMode), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            dogModeButton.bottomAnchor.constraint(equalTo: callToActionButton.topAnchor, constant: -12), // like with the trailing anchors, the bottom ones need negative constant values as well.
+            dogModeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
+            dogModeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
+            dogModeButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     

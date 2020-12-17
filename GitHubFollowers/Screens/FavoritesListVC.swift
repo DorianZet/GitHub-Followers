@@ -11,6 +11,7 @@ class FavoritesListVC: GFDataLoadingVC {
     
     let tableView = UITableView()
     var favorites: [Follower] = []
+    var emptyStateViewAlreadyShown = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,17 +21,20 @@ class FavoritesListVC: GFDataLoadingVC {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        view.setBackgroundColor(forDogMode: GlobalVariables.isDogModeOn)
+        tableView.setBackgroundColor(forDogMode: GlobalVariables.isDogModeOn)
         getFavorites()
     }
     
     func configureViewController() {
-        view.backgroundColor = .systemBackground
+        view.setBackgroundColor(forDogMode: GlobalVariables.isDogModeOn)
         title = "Favorites"
         navigationController?.navigationBar.prefersLargeTitles = true
     }
     
     func configureTableView() {
         view.addSubview(tableView)
+        tableView.setBackgroundColor(forDogMode: GlobalVariables.isDogModeOn)
         tableView.frame = view.bounds // fill up the whole view with our table view.
         tableView.rowHeight = 80 // make every table cell of a height 80.
         tableView.delegate = self // our VC now "listens" to the tableView and acts upon the changes in it
@@ -56,8 +60,12 @@ class FavoritesListVC: GFDataLoadingVC {
     
     func updateUI(with favorites: [Follower]) {
         if favorites.isEmpty {
-            self.showEmptyStateView(with: "No Favorites?\nAdd one on the follower screen.", in: self.view)
+            if emptyStateViewAlreadyShown == false {
+                self.showEmptyStateView(with: "No Favorites?\nAdd one on the follower screen.", in: self.view)
+                emptyStateViewAlreadyShown = true
+            }
         } else {
+            emptyStateViewAlreadyShown = false
             self.favorites = favorites
             DispatchQueue.main.async {
                 self.tableView.reloadData()
@@ -78,6 +86,7 @@ extension FavoritesListVC: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteCell.reuseID) as! FavoriteCell
         let favorite = favorites[indexPath.row]
         cell.set(favorite: favorite)
+        cell.setBackgroundColor(forDogMode: GlobalVariables.isDogModeOn)
         
         return cell
     }
@@ -85,6 +94,7 @@ extension FavoritesListVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let favorite = favorites[indexPath.row]
         let destVC = FollowerListVC(username: favorite.login) // pushing the FollowerListVC, initializing it with the selected username's login.
+        destVC.isDogModeOn = GlobalVariables.isDogModeOn
         
         navigationController?.pushViewController(destVC, animated: true)
     }
@@ -104,8 +114,6 @@ extension FavoritesListVC: UITableViewDataSource, UITableViewDelegate {
             } // if error is nil, return, we don't need to do anything further because updating the persisting Favorites array was successful.
             
             self.presentGFAlertOnMainThread(title: "Unable to remove", message: error.rawValue, buttonTitle: "OK")
-            
-            
         }
     }
 }

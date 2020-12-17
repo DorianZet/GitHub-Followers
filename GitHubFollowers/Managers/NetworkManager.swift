@@ -11,11 +11,12 @@ class NetworkManager {
     static let shared = NetworkManager()
     private let baseURL = "https://api.github.com/users/" // we can create a baseURL for our convenience, as all the url calls will start with this url.
     let cache = NSCache<NSString, UIImage>()
+    let numberOfObjectsFetched = 50
     
     private init() {}
     
     func getFollowers(for username: String, page: Int, completed: @escaping (Result<[Follower], GFError>) -> Void) { // the 'GFError' is the enum we created in 'Utilities' folder. The result can be a success - which then returns an array of 'Follower', or a failure - which then returns a GFError (which complies to 'Error' protocol - otherwise we wouldn't be able to use it).
-        let endpoint = baseURL + "\(username)/followers?per_page=100&page=\(page)" // we make a call for 100 users at once. we can change it to 50 or 60 if need be.
+        let endpoint = baseURL + "\(username)/followers?per_page=" + "\(numberOfObjectsFetched)" + "&page=\(page)" // we make a call for 50 users at once. we can change it to anything up to 100 (API restrictions).
         
         guard let url = URL(string: endpoint) else {
             completed(.failure(.invalidUsername)) // if url is nil, it's a failure case and we present an error message attached to that case.
@@ -90,11 +91,50 @@ class NetworkManager {
         task.resume() // starts the network call.
     }
     
+    func getRandomDogs(numberOfDogs: Int, completed: @escaping (Result<Dogs, GFError>) -> Void) {
+        let endpoint = urlList.getDogsImagesUrl + "\(numberOfDogs)"
+        
+        guard let url = URL(string: endpoint) else {
+            completed(.failure(.dogsDownloadError))
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let _ = error {
+                completed(.failure(.dogsDownloadError))
+                return
+            }
+            
+            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+                completed(.failure(.dogsDownloadError))
+                return
+            }
+            
+            guard let data = data else {
+                completed(.failure(.dogsDownloadError))
+                return
+            }
+            
+            do {
+               let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let dogs = try decoder.decode(Dogs.self, from: data)
+                completed(.success(dogs))
+            }
+            catch {
+                completed(.failure(.dogsDownloadError))
+            }
+        }
+        
+        task.resume() // starts the network call.
+    }
+    
     func downloadImage(from urlString: String, completed: @escaping (UIImage?) -> Void) {
         let cacheKey = NSString(string: urlString) // setting the image's cache key, which will be its url string.
         
         if let image = cache.object(forKey: cacheKey) { // if the image is already in the cache, set the avatar image as this image in the cache and return.
             completed(image)
+            print("Downloaded cache image")
             return
         }
         
